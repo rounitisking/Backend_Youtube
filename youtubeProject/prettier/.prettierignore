@@ -1,0 +1,8 @@
+*.env
+.env
+.env.*
+/mode_modules
+/model 
+/.vscode
+README.md 
+
