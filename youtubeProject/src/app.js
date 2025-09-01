@@ -1,24 +1,34 @@
-import express from "express";
-import DB_CONNECT from "../src/db/db.connect.js"
-app.use(express.json())
-app.use(express.urlencoded())
-const port = 3000 || process.env.PORT
-//her ewe will be writting the cors
+// we can connect with the db by using of the iffi function ()()  -- iffi fuction is used to when we want the function to be executed at that time only
+//earlier we use to body parser to handle the json data i the backedn
+// when we use extendede tru in the urlencoded we are saying to the server that in url if a object has object plz also accept that 
+//to send data in the url :
+// 1. name=rounit&age=20 -- this can be handeled by the simple urlencoded
+// 2. user[name]=rounit&user[age]=20 or items[]=apple&items[]=banana -- this is used whn storing of teh array   -- this type of data is handeled by the extended = true
 
+// when i want to store the files and the pdf we use express.static() to tell the server we are storing the files inthe server
+// req.get -- iske callback function mai 4 params hota hai (error, req , res , next)
+
+
+import express from "express";
+import cors from "cors"
+import cookieparser from "cookieparser"
 const app = express()
 
-try {
-    DB_CONNECT()
-    .then(
-        app.listen(port , ()=>{
-            console.log(`server is connected to the http://localhost/${port}`)
-        })
-    )
-} catch (error) {
-    console.log("error occured while connecting with the db in app.js file")
+app.use(express.json({limit : "16kb"}))
+app.use(express.urlencoded({extended : true , limit : "16kb"})) 
+app.use(express.static("Public"))
+app.use(cookieparser)
+
+//here we will be writting the cors
+const corsOption = {
+    origin : process.env.BASE_URL ,
+    credentials : true
 }
+app.use(cors(corsOption))
 
 
 
 
 
+
+export default app

@@ -4,13 +4,18 @@ dotenv.config()
 
 const DB_CONNECT = async()=>{
     
-    await mongoose.connect(process.env.MONGODB_URI)
-    .then(
-        console.log("db connected successfully")
-    )
-    .catch(
-        console.log("error occured in while connecting with the db in the dbc.connect.js file")
-    )
+   try {
+    const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}`) // it returns the resopnse after connecting
+    
+         console.log(`db connected successfully  : ${connectionInstance.connection.host}`)
+     
+     
+         
+        } catch (error) {
+       console.log("error occured in while connecting with the db in the db.connect.js file"),
+       process.exit(1)  //node give us process
+    
+   }
 }
 
 export default DB_CONNECT;
