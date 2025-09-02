@@ -9,7 +9,8 @@
 // req.get -- iske callback function mai 4 params hota hai (error, req , res , next)
 
 
-import express from "express";
+//in route we write api/v1 -- here v1 means 
+import express, { Router } from "express";
 import cors from "cors"
 import cookieparser from "cookieparser"
 const app = express()
@@ -27,8 +28,9 @@ const corsOption = {
 app.use(cors(corsOption))
 
 
+//routes
+import router from "../src/router/users.router.js"
 
-
-
+app.use("/api/v1/users" , router)
 
 export default app

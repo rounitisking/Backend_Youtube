@@ -8,7 +8,7 @@ export class ApiError extends Error{
         this.data = null,
         this.success = false,
         this.message = message,
-        this.errors = error,
+        this.errors = error
         
         if(stack){
 

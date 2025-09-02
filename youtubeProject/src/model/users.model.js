@@ -5,7 +5,7 @@
 
 
 import mongoose , {Schema} from "mongoose"
-import  {UserRoleEnum} from "./utils/constants.js"
+import  {UserRoleEnum} from "../utils/constants.js"
 import crypto from "crypto"
 import bcrypt from "bcrypt"
 import jsonwebtoken from "jsonwebtoken"
@@ -50,76 +50,76 @@ const UserSchema = new Schema({
     },
     role : {
         type : String,
-        required : true,
+       
         enum : UserRoleEnum,
         default : UserRoleEnum.CREATOR
         
     },
     refreshToken : {
         type : String,
-        required : true,
+        
         
         
     },
     accessToken : {
         type : String,
-        required : true,
+        
         
         
     },
     watchHistory :[ {
-        type : mongoose.Schema.Types.objectId(),
+        type : mongoose.Schema.Types.ObjectId,
         ref : "Video"
         
         
     }],
     WatchLater : [{
-        type : mongoose.Schema.Types.objectId(),
+        type : mongoose.Schema.Types.ObjectId,
         ref : "Video"
         
         
     }],
     likedVideos : [{
-        type : mongoose.Schema.Types.objectId(),
+        type : mongoose.Schema.Types.ObjectId,
         ref : "Video"
         
         
     }],
     favVideos : {
-        type : mongoose.Schema.Types.objectId(),
+        type : mongoose.Schema.Types.ObjectId,
         ref : "Video"
         
         
     },
     verificationToken : {
         type : String,
-        required :  true
-        
+                
         
     },
     verificationTokenExpiry : {
         type : Date,
-        required :  true,
+        
         default : Date.now()
         
         
     },
     isVerified : {
-        type : boolean,
-        required :  true,
+        type : Boolean,
+        
         default : false
         
         
     },
     avatar : {
         type : String, // we are using cloudnary service
-        required :  true,
+        required : true
                 
         
     },
     coverImage : {
         type : String,
-        required :  true,
+        required : true
+        
         
         
         
