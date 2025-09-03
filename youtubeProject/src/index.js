@@ -3,7 +3,7 @@
 import dotenv from "dotenv"
 import DB_CONNECT from "../src/db/db.connect.js"
 import app from "./app.js"
-dotenv.config({ path : './env'})
+dotenv.config({ path : './.env'})
 const port = 3000 || process.env.PORT
 
 try {

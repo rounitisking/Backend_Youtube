@@ -77,7 +77,7 @@ const registerUser = asyncHandeler(async (req,res)=>{
         }
 
         
-        const user = await User.create({fullName , email , password , username.toLowercase() , avatar : avatar.url , coverImage : coverImage.url})
+        const user = await User.create({fullName , email , password , username , avatar : avatar.url , coverImage : coverImage.url})
         
         if(!user){
 
@@ -100,6 +100,11 @@ const registerUser = asyncHandeler(async (req,res)=>{
         }
         user.verificationToken = verificationToken.hashedToken
         await user.save()
+
+        const data = User.findOne({id : user._id}).select("-password -refreshToken")
+        return res.status(200).json(
+                new ApiResponse(200, data, "user registration completed")
+        )
 
 
         //sending the mail
