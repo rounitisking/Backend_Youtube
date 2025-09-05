@@ -1,5 +1,17 @@
 //jsonwebtoken is a bearer token
 //middleware adds extra fields in the req
+// $or , $and --  these are the operators of the mongo db
+
+//we use validateBeforeSave = false when: 
+// Model.create(), doc.save() , insertMany() -- Required fields check har save ke waqt hota hai.
+
+// Agar wo fields pehle se fill hain → dusre controller mein sirf ek aur field update karne pe error nahi aayega.
+
+// Error tabhi aayega jab required field missing ho ya aap usko deliberately null/undefined kar do.
+
+
+//jab ham cookies ke options mai httpOnly and secure ko true krte hai tho cookies ko bas ham server se modify kr skte hai 
+
 
 import {asyncHandeler} from "../utils/asyncHandeler.js"
 import mongoose from "mongoose"
@@ -9,6 +21,8 @@ import crypto from "crypto"
 import User from "../model/users.model.js"
 import { basename } from "path/win32"
 import uploadOnCloudinary from "../utils/cloudinary.js"
+import bcrypt from "bcrypt"
+import cookieParser from "cookieParser"
 
 const registerUser = asyncHandeler(async (req,res)=>{
         //pehle user se data lo 
@@ -99,9 +113,13 @@ const registerUser = asyncHandeler(async (req,res)=>{
                 )
         }
         user.verificationToken = verificationToken.hashedToken
-        await user.save()
+        
+        //
+        await user.save({validateBeforeSave : false})
 
         const data = User.findOne({id : user._id}).select("-password -refreshToken")
+
+
         return res.status(200).json(
                 new ApiResponse(200, data, "user registration completed")
         )
@@ -112,18 +130,158 @@ const registerUser = asyncHandeler(async (req,res)=>{
 })
 
 
+const ValidateUser = asyncHandeler(async (req,res)=>{
+
+        // hamne jo user ko mail mai url bheja tha usse params se token lo
+        // uss token ko db se verify krwao
+        //agar verify ho jaye tho isverified ko tru krdo
+
+
+        const {verificationToken} = req.params
+
+        const user = await User.findOne({verificationToken : verificationToken})
+
+        if(!user){
+                return res.status(400).json(
+                        new ApiError(400 , "verification token is not valid , error occured in the verify contoller")
+                )
+        }
+
+        user.isVerified = true
+        const IsUpdated = await user.save()
+
+        if(!IsUpdated){
+                return res.status(400).json(
+                        new ApiError(400 , "error occured while saving the isverfied in the db , error occured in the verify controler")
+                )
+        }
+
+        return res.status(200).json(
+                        new ApiError(200 , "user is verified")
+                )
+
+                
+})
+
+
 const loginUser = asyncHandeler(async (req, res)=>{
         // take data from the user -- email , password 
         //validate the password -- validation will be one in the validator file 
         //find the user on the basis of email
         //password ko bcrypt se compare kro
         // ek refresh token generate kro and ek access token
-        //cookies mai push krdo
+        //cookies mai push krdo access token ko 
+        //refresh token ko db mai push krdo
 
 
+
+        const {email , password} = req.body
+
+        //validation is done in the valdation file 
+
+        const user = await User.findOne({email})
+        if(!user){
+                return res.status(400).json(
+                        new ApiError(400 , "invalid email , error occured in the login controler")
+                )
+        }
+
+        if(!user.isVerified){
+                return res.status(400).json(
+                        new ApiError(400 , "user is not verified plz first verify the user , error occured in the login controler")
+                )
+        }
+
+        const IsPwdCorrect = await user.isPasswordCorrect(password)
+
+        if(!IsPwdCorrect){
+                return res.status(400).json(
+                        new ApiError(400 , "invalid password , error occured in the login controler")
+                )
+                                 }
+
+
+        const AccessToken = await User.generateAccessToken()
+
+                                const RefreshToken = await User.generateRefreshToken()
+
+        if(!accessToken || !refreshToken){
+                return res.status(400).json(
+                        new ApiError(400 , "error occured while generation of the access token or the refresh token , error occured in the login controler")
+                )
+        }
+
+
+                //setting up the access token in the cookies
+                const cookieOption = {
+                        httpOnly : true,
+                        secure : true,
+                        maxAge : 20*60*600*1000
+                    }
+
+                    
+                    
+                    
+                    const UpdateRefreshTokenInDB = await User.updateOne(email , {$set : {refreshToken : RefreshToken}} , {upsert : true}, (err , res)=>{
+                            if(err){return  res.status(400).json(
+                                    new ApiError(400 , `errro occured in the login controller ${err.message}`)
+                                )}
+                        })
+                        
+                        if(!UpdateRefreshTokenInDB){
+                                return res.status(400).json(
+                                        new ApiError(400 , "refresh token is not saved in the db , error occured in the login controler")
+                                )
+                        }
+                        
+                        
+                        const loginedUser = await User.findOne({_id : user._id}).select("-password -refreshToken")
+                        
+                        return res.status(200).cookies("AccessToken" , AccessToken , cookieOption).json(
+                                new ApiResponse(200 , {loginedUser, RefreshToken , AccessToken} , "user loggedin successfully")
+                        )
+                        
         
 })
+
+
 const logoutUser = asyncHandeler(async (req, res)=>{
+
+        //ismai ham first check karenge ki user loggined hai ya nhi by using the login middleware 
+        // refresh token and access token ko empty kr denge 
+        // clear the cookies also      
+        // ho gaya user logout
+
+
+        const user = await User.findById(req.user._id).select("-password , -refreshToken")
+
+
+        user.refreshToken = null
+        user.accessToken = null
+
+       const isChanged = await user.save({validateBeforeSave : false})
+
+       if(!isChanged){
+        
+        return res.status(400).json(
+                        new ApiError(400 , "error occured while logout the user, error occured in the logout controler")
+                )
+                
+        }
+
+        const options = {
+                httpOnly : true,
+                secure  : true
+        }
+
+        return res.status(200).cookies("AccessToken" ,null , options)
+        .json(
+                new ApiResponse(200 , user , "user logged out successfully")
+        )
+        
+        
+})
+const DeleteAccountUser = asyncHandeler(async (req, res)=>{
 
 })
 

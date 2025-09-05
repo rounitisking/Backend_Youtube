@@ -140,6 +140,8 @@ UserSchema.pre("save" , async function(next){  // yaha pe ham callback fucntion 
         return next()
 })
 
+//all these methods will be used by the insatnce of the User
+
 
 UserSchema.methods.isPasswordCorrect = async (pwd)=>{
     const isCorrect = await bcrypt.compare(pwd , this.password)
@@ -148,7 +150,7 @@ UserSchema.methods.isPasswordCorrect = async (pwd)=>{
             {
                 success : false,
                 status : 400,
-                message : "incorrect pasword enter the correct one , errror occured while check the pwd in isPasswordCorrect method"
+                message : "incorrect pasword enter the correct one , errror occured while check the pwd in verifyUser method"
             }
         )
     }

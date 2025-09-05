@@ -12,7 +12,7 @@ const DB_CONNECT = async()=>{
      
          
         } catch (error) {
-       console.log("error occured in while connecting with the db in the db.connect.js file"),
+       console.log("error occured in while connecting with the db in the db.connect.js file" , error),
        process.exit(1)  //node give us process
     
    }
