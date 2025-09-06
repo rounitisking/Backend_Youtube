@@ -1,8 +1,0 @@
-                                                                    ---all about HTTP--- HYPER TEXT TRANSFER PROTOCOL
-
-
-all this includes the transfer of data from one server (client) to the other server on internet 
-
-url , uri , urn - hame uska location cahiye l - locator , i - identifier , n - name
-
-what are HTTP headers -- headers are the metadata-- ky value sent along with the req and res ,,  sent along with the http req and res [HTTP headers are extra information (metadata) attached to HTTP requests and responses that describe how to process the actual data.]

@@ -1,8 +1,8 @@
 // we can what files not to include in the git can be know by visiting the site know as gitignore generater
 
-import dotenv from "dotenv"
-import DB_CONNECT from "../src/db/db.connect.js"
+import DB_CONNECT from "./db/db.connect.js"
 import app from "./app.js"
+import dotenv from "dotenv"
 dotenv.config({ path : './.env'})
 const port = 3000 || process.env.PORT
 

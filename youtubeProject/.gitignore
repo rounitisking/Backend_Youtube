@@ -1,3 +1,6 @@
 node_modules
-.env
-.env.sample
+# ignore the entire env folder
+env/
+
+# ignore the certain file in the folder
+# env/.env

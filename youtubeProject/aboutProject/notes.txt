@@ -1,0 +1,20 @@
+if u want to delete the installed package from the node u have two ways --
+1. delete that package from the node file and from the package.json then do npm i 
+2. npm uninstall package_name
+
+
+
+if i have commited the env file or aisi file jo commit nhi honi cahiye uske liye command is ::
+
+here the command git rm -- means that the file is removed from the git tracking and --cached means git se tho remove ho jayegi but local system pe rahegi vaha se delete nhi hogi
+git rm --cached config/.env             -- here config bas isliye likha hia kyuki vo ek flder ka name hai and env file ek folder mai hai 
+git commit -m "Stop tracking env file"
+
+
+
+
+
+new package and why to use :
+
+1. to upload file or handeling file -- we use 
+    express-fileupload and multer

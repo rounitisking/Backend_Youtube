@@ -1,3 +1,5 @@
+// when we allowing the user to change the file we generally write the login in the new controller
+
 //jsonwebtoken is a bearer token
 //middleware adds extra fields in the req
 // $or , $and --  these are the operators of the mongo db
@@ -12,6 +14,8 @@
 
 //jab ham cookies ke options mai httpOnly and secure ko true krte hai tho cookies ko bas ham server se modify kr skte hai 
 
+//when we write new : true in the options of the update method of the mongoose it will return the object of the updated values
+
 
 import {asyncHandeler} from "../utils/asyncHandeler.js"
 import mongoose from "mongoose"
@@ -22,7 +26,7 @@ import User from "../model/users.model.js"
 import { basename } from "path/win32"
 import uploadOnCloudinary from "../utils/cloudinary.js"
 import bcrypt from "bcrypt"
-import cookieParser from "cookieParser"
+
 
 const registerUser = asyncHandeler(async (req,res)=>{
         //pehle user se data lo 
@@ -130,6 +134,7 @@ const registerUser = asyncHandeler(async (req,res)=>{
 })
 
 
+
 const ValidateUser = asyncHandeler(async (req,res)=>{
 
         // hamne jo user ko mail mai url bheja tha usse params se token lo
@@ -203,7 +208,7 @@ const loginUser = asyncHandeler(async (req, res)=>{
 
         const AccessToken = await User.generateAccessToken()
 
-                                const RefreshToken = await User.generateRefreshToken()
+        const RefreshToken = await User.generateRefreshToken()
 
         if(!accessToken || !refreshToken){
                 return res.status(400).json(
@@ -237,7 +242,7 @@ const loginUser = asyncHandeler(async (req, res)=>{
                         
                         const loginedUser = await User.findOne({_id : user._id}).select("-password -refreshToken")
                         
-                        return res.status(200).cookies("AccessToken" , AccessToken , cookieOption).json(
+                        return res.status(200).cookies("AccessToken" , AccessToken , cookieOption).cookies("RefreshToken",RefreshToken, cookieOption ).json(
                                 new ApiResponse(200 , {loginedUser, RefreshToken , AccessToken} , "user loggedin successfully")
                         )
                         
@@ -274,16 +279,38 @@ const logoutUser = asyncHandeler(async (req, res)=>{
                 secure  : true
         }
 
-        return res.status(200).cookies("AccessToken" ,null , options)
+        return res.status(200).clearCookie("AccessToken" ,options)
         .json(
                 new ApiResponse(200 , user , "user logged out successfully")
         )
         
         
 })
+
+
 const DeleteAccountUser = asyncHandeler(async (req, res)=>{
 
 })
 
 
+const ChangeCurrentPasswordUser = asyncHandeler(async (req, res)=>{
+
+})
+const GetCurrentUser = asyncHandeler(async (req, res)=>{
+
+})
+const UpdateAccountDetailsUser = asyncHandeler(async (req, res)=>{
+
+})
+const UpdateAvatarUser = asyncHandeler(async (req, res)=>{
+
+})
+const UpdateCoverImageUser = asyncHandeler(async (req, res)=>{
+
+})
+
+
 export {registerUser , loginUser}
+
+
+

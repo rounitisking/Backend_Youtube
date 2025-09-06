@@ -18,7 +18,7 @@ const app = express()
 app.use(express.json({limit : "16kb"}))
 app.use(express.urlencoded({extended : true , limit : "16kb"})) 
 app.use(express.static("Public"))
-app.use(cookieparser())
+app.use(cookieparser)
 
 //here we will be writting the cors
 const corsOption = {
