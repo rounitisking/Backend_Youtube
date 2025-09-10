@@ -17,6 +17,9 @@
 //when we write new : true in the options of the update method of the mongoose it will return the object of the updated values
 
 
+//req.user._id - iss se hame ek string milti hai and jab ham findone function use krte hai tho mongoose isse mongodb ki object id mai convert kr deta hai 
+// but when we write the aggregation pipeline the code is directly sent to the mongodb without converison so when we use match with the id we have to first convert the id into the object id of the mongoose
+
 import {asyncHandeler} from "../utils/asyncHandeler.js"
 import mongoose from "mongoose"
 import {ApiError} from "../utils/api.error.js"
@@ -306,6 +309,121 @@ const UpdateAvatarUser = asyncHandeler(async (req, res)=>{
 
 })
 const UpdateCoverImageUser = asyncHandeler(async (req, res)=>{
+
+})
+
+// yaha ham kisi ke channel ke profile pe jaa rhe hai 
+const getChannelProfileUser = asyncHandeler(async (req, res)=>{
+
+        const {username} = req.params
+
+        if(!username?.trim()){
+
+                return res.status(400).json(
+                        new ApiError(400 , "enter a valid username, errror occured in the get channel profile user controller")
+                )
+
+        }
+
+
+        // yaha pr mujhe array-- jo ki ek channel hai -- usmai ek hi value milegi kyuki mane ek hi user ke liye match kiya hai and here channel is a array
+        //project is used to return the selected values into the array
+        const channel = await User.aggregate([
+                {
+                        $match : {
+                                username : username.toLowerCase()
+                        }
+                },
+                {
+                        // here we are finding the number of subscribers the channel has
+                        $lookup :{
+                                from : "subscriptions",
+                                localField: "_id",
+                                foreignField: "channel",
+                                as : "Subscriber"
+                        }
+                },
+                
+                // yaha pr ham ye find kr rhe hai ki hamne kis kis ko subscribe kiya hai
+                {
+                $lookup :{
+                        from : "subscriptions",
+                        localField : "_id",
+                        foreignField : "subscriber",
+                        as : "channelSubscribed"
+                }
+                },
+
+                {
+                        // this operator add additional fields additional to the model -- here in the user model
+                        $addFeild : {
+                                subscribersCount : {
+                                        $size : "$Subscriber",
+                                        
+                                },
+                                noOfChannelSubscribedCount : {
+                                        $size  : "$channelSubscribed"
+                                },
+                                isSubscribed : {
+                                        //cond has three parameters first one is the if ,then , else -- then is executed when the if is true and the else is executed when the if is false 
+                                        $cond : {
+                                                // this in can traverse the object and the array both
+                                                if : {$in : [req.user?._id,"$Subscriber.subscriber"]},
+                                                then : true,
+                                                else: false
+                                        }
+                                }
+                        }
+                },
+
+                {
+                        $project : {
+                                fullName : 1,
+                                username : 1,
+                                email : 1,
+                                coverImage : 1,
+                                avatar : 1,
+                                subscribersCount:1,
+                                noOfChannelSubscribedCount : 1,
+                                isSubscribed : 1
+
+                        }
+                }
+        ])
+
+        
+
+        if(!channel?.length){
+                return res.status(400).json(
+                        new ApiError(400 , "such channel does nt exsist, errror occured in the get channel profile user controller")
+                )
+        }
+        
+        
+        return res.status(200).json(
+                new ApiError(200 , channel[0] , "no of subscriber found")
+        )
+        
+
+
+})
+
+
+const getWatchHistory= asyncHandeler(async (req,res)=>{
+
+        const user = await User.aggregate([
+                {
+                        $match : {
+                                _id : new mongoose.Types.ObjectId(req.user._id)
+                        }
+                },
+                {
+                        $lookup : {
+                                from : "Video",
+                                localField : ""
+                        }
+                }
+        ])
 
 })
 
